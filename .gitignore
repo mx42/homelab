@@ -15,5 +15,5 @@ config.tf.json
 nixos-template
 
 # Possibly sensitive for public repo
-infra/ips.nix
-infra/constants.nix
+lib/ips.nix
+lib/constants.nix
