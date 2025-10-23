@@ -13,13 +13,13 @@ My main objective was to have a "light" definition for the containers and to be 
 # Usage
 
 ## Prepare the infra constants
-- `cp infra/constants.nix.template infra/constants.nix`
-- adapt `infra/constants.nix` to match your needs
-- touch `infra/ips.nix`
+- `cp lib/constants.nix.template lib/constants.nix`
+- adapt `lib/constants.nix` to match your needs
+- touch `lib/ips.nix`
 - remove both these files from `.gitignore` and `git add` them. 
 
 ## Build NixOS template
-- modify `infra/lxc-template.nix` as needed
+- modify `lib/lxc-template.nix` as needed
 - run `build-template`
 - template available in `nixos-template/tarball/`
 (.tar.xz to be uploaded to Proxmox)
@@ -34,19 +34,19 @@ TODO Script the Proxmox Template upload if possible.
 - run `tofu init`
 
 ## Adapt NixOS / Terraform modules building
-- edit `lib/containers.nix` to change how a container definition is translated to TF / NixOS config (in particular check the template name)
+- edit `lib/container_build.nix` to change how a container definition is translated to TF / NixOS config (in particular check the template name)
 
 ## Create containers definitions
-- `cp containers/lxc-cont.nix.template containers/lxc-#NAME#.nix` 
-- edit `containers/lxc-#NAME#.nix` as needed
+- run `add-lxc [name] [id]`
+- edit `lxc/#NAME#.nix` as needed
 - run `build-terraform-json`
 - run `tofu plan` and review the plan
 - run `tofu apply`, hopefully without errors
-- run `deploy #NAME#`
+- run `deploy-lxc #NAME#`
 
 ## Update container
-- edit `containers/lxc-#NAME#.nix` as needed
+- edit `lxc/#NAME#.nix` as needed
 - if the container specs have changed, do all as above
-- otherwise you can just run `deploy #NAME#`
+- otherwise you can just run `deploy-lxc #NAME#`
 
 

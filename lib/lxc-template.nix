@@ -25,11 +25,6 @@ in
     coreutils
   ];
   services.openssh.enable = true;
-  services.chrony = {
-    enable = true;
-    enableNTS = true;
-    servers = [ "time.cloudflare.com" ];
-  };
   nix.settings = {
     experimental-features = [
       "nix-command"
@@ -49,6 +44,7 @@ in
     openssh.authorizedKeys.keys = [
       infra.master_public_ssh_key
     ];
+    initialPassword = "nixos";
   };
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";

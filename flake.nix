@@ -29,13 +29,13 @@
       pkgs = nixpkgs.legacyPackages.${system};
       lib = pkgs.lib;
 
-      containersMapping = import ./infra/ips.nix;
+      containersMapping = import ./lib/ips.nix;
 
       containers = import ./lxc { inherit pkgs containersMapping; };
 
-      lxc-def = import ./infra/lxc-template.nix;
+      lxc-def = import ./lib/lxc-template.nix;
 
-      infra = import ./infra/constants.nix;
+      infra = import ./lib/constants.nix;
 
       nixosConfigurations = lib.mapAttrs (
         _: def:
@@ -45,7 +45,7 @@
         }
       ) containers;
 
-      terraformCfg = import ./infra;
+      terraformCfg = import ./lib/infra.nix;
 
       terraformResources = {
         resource.proxmox_lxc = lib.mapAttrs (_: def: def.terraformResource) containers;
@@ -93,19 +93,19 @@
                 if ! [[ "$2" =~ ^[0-9]+$ ]]; then
                   echo "Error: invalid container ID '$2', should be a number" && exit
                 fi
-                if ! [ -f infra/ips.nix ]; then
-                  echo "{" > infra/ips.nix
-                  echo "}" >> infra/ips.nix
+                if ! [ -f lib/ips.nix ]; then
+                  echo "{" > lib/ips.nix
+                  echo "}" >> lib/ips.nix
                 fi
-                if ! [[ -z "`grep "[^0-9]$2[^0-9]" infra/ips.nix`" ]]; then
+                if ! [[ -z "`grep "[^0-9]$2[^0-9]" lib/ips.nix`" ]]; then
                   echo "Error: container ID '$2' already used" && exit
                 fi
                 if [ -f lxc/$1.nix ]; then
                   echo "Error: container definition '$1' already exists" && exit
                 fi
-                sed -i "s#}#  $1 = $2;#" infra/ips.nix
-                echo "}" >> infra/ips.nix
-                cp lxc/container.nix.template lxc/$1.nix
+                sed -i "s#}#  $1 = $2;#" lib/ips.nix
+                echo "}" >> lib/ips.nix
+                cp lib/container.nix.template lxc/$1.nix
                 git add lxc/$1.nix
                 echo "Entry added to infra/ips.nix"
                 echo "Container template copied to lxc/$1.nix, please edit it"
@@ -113,7 +113,8 @@
 
               scripts.deploy-lxc.exec = ''
                 if [ -f lxc/$1.nix ]; then
-                  CONTID=`grep -E "$1 ?=" infra/ips.nix | cut -d '=' -f 2 | grep -o '\<[0-9]*\>' `
+                  CONTID=`grep -E "$1 ?=" lib/ips.nix | cut -d '=' -f 2 | grep -o '\<[0-9]*\>' `
+                  # TODO Verify mapping exists...
                   echo "Redeploying LXC on container '$1' ('$CONTID')"
                   nixos-rebuild switch --flake .#$1 --target-host root@${infra.ip_prefix}$CONTID
                   echo "Done."

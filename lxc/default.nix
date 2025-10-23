@@ -2,7 +2,7 @@
 let
   lib = pkgs.lib;
 
-  containerBuild = import ../lib/containers.nix;
+  containerBuild = import ../lib/container_build.nix;
 
   containersFiles = builtins.readDir ./.;
 
@@ -10,7 +10,7 @@ let
     lib.mapAttrs (
       name: type:
       if type == "regular" && name != "default.nix" && lib.hasSuffix ".nix" name then
-        import ./${name} { inherit containersMapping pkgs; }
+        import ./${name} { inherit name containersMapping pkgs; }
       else
         null
     ) containersFiles
@@ -26,7 +26,7 @@ let
         hostname = hostname;
         container_id = containersMapping.${hostname};
       };
-      result = containerBuild { inherit def; };
+      result = containerBuild { inherit def lib; };
     in
     {
       name = hostname;

@@ -1,6 +1,6 @@
 { pkgs, containersMapping, ... }:
 let
-   infra = import ../infra/constants.nix;
+   infra = import ../lib/constants.nix;
 in
 {
   # OPTIONAL int cores: number of CPU (default = 1)
@@ -38,4 +38,20 @@ in
 
   # OPTIONAL bool logging.metrics.enable: whether to enable the Alloy metrics configuration (=> Prometheus)
   logging.metrics.enable = true;
+
+  # OPTIONAL string template: template file to use (default defined in infra/constants.nix)
+  template = null;
+
+  # OPTIONAL bool unprivileged: whether the container should be unprivileged (default true)
+  unprivileged = true;
+
+  # OPTIONAL string tags: ';'-separated tags, appended to "terraform" (default empty)
+  tags = "";
+
+  # OPTIONAL list of paths additional_tf_modules: list of modules to merge into the tf ressource module (default [])
+  # Not implemented
+  additional_tf_modules = [];
+
+  # OPTIONAL bool exposed: whether this host should be exposed by the reverse proxy.
+  exposed = false;
 }
