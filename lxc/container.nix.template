@@ -1,0 +1,41 @@
+{ pkgs, containersMapping, ... }:
+let
+   infra = import ../infra/constants.nix;
+in
+{
+  # OPTIONAL int cores: number of CPU (default = 1)
+  cores = 2;
+
+  # OPTIONAL int memory: RAM memory (default 512)
+  memory = 512;
+
+  # OPTIONAL string disk: disk space (default "4G") - beware, NixOS is greedy
+  disk = "4G";
+
+  # OPTIONAL string swap: swap space (default null)
+  swap = null;
+
+  # OPTIONAL list of int ports: ports to open (TCP tho) (default [])
+  ports = [ 80 ];
+
+  # OPTIONAL submodule services: services to be passed to the NixOS Module (default {})
+  services = {
+    nginx.enable = true;
+  };
+
+  # OPTIONAL list of pkgs other_packages: packages to add to eenvironment.systemPackages (default [])
+  other_packages = [ pkgs.hello ];
+
+  # OPTIONAL submodule etc: files contents to pass to eenvironment.etc
+  etc."alloy/log-myservice.alloy" = ''
+    # logger_ip = ${infra.build_ip containersMapping.grafana}
+    # prometheus = ${infra.build_ip containersMapping.prometheus}
+  '';
+
+  # OPTIONAL bool logging.enable: whether to enable the Alloy configuration (=> Loki)
+  # Need further configuration in etc."alloy/log-myservice.alloy"
+  logging.enable = true;
+
+  # OPTIONAL bool logging.metrics.enable: whether to enable the Alloy metrics configuration (=> Prometheus)
+  logging.metrics.enable = true;
+}

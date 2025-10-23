@@ -1,0 +1,19 @@
+# Direnv & Devenv
+.direnv
+.envrc.local
+.devenv
+.devenv.flake.nix
+
+# should be Terranix .nix files instead
+*.tf
+*.tfvars
+*.tfstate*
+.terraform*
+
+# Outputs
+config.tf.json
+nixos-template
+
+# Possibly sensitive for public repo
+infra/ips.nix
+infra/constants.nix

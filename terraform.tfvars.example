@@ -1,0 +1,4 @@
+pm_api_url          = "https://proxmox:8006/api2/json"
+pm_api_token_id     = "terraform@pve"
+pm_api_token_secret = "secr3t"
+pve_node = "proxmox"

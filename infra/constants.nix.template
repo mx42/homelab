@@ -1,0 +1,19 @@
+{
+  # Centralizes the IP to the gateway for the containers.
+  gateway_ip = "10.0.0.1";
+
+  # Builders for IP addresses, given a container id.
+  ip_prefix = "10.0.0.";
+  cidr = "24";
+  build_ip = id: "${ip_prefix}${toString id}";
+  build_ip_cidr = id: "${ip_prefix}${toString id}/${cidr}";
+
+  # Your deployer's host
+  master_public_ssh_key = "ssh-ed25519 [...] me@here";
+
+  # Default timezone for the containers
+  default_tz = "UTC";
+
+  # NixOS template build name => see `ls nixos-template/tarball/`
+  nixos_template_name = "nixos-image-lxc-proxmox-25.11pre-git-x86_64-linux";
+}
