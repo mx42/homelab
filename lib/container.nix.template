@@ -15,8 +15,11 @@ in
   # OPTIONAL string swap: swap space (default null)
   swap = null;
 
-  # OPTIONAL list of int ports: ports to open (TCP tho) (default [])
-  ports = [ 80 ];
+  # OPTIONAL list of int tcp_ports: TCP ports to open (default [])
+  tcp_ports = [ 80 ];
+
+  # OPTIONAL list of int udp_ports: UDP ports to open (default [])
+  udp_ports = [ ];
 
   # OPTIONAL submodule services: services to be passed to the NixOS Module (default {})
   services = {

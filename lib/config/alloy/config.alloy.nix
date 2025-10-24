@@ -4,7 +4,7 @@ in
 {
   out = ''
     logging {
-      level = "warning"
+      level = "warn"
     }
     loki.write "grafana_loki" {
       endpoint {

@@ -9,7 +9,8 @@ let
   disk = def.disk or "4G";
   swap = def.swap or 512;
   services = def.services or { };
-  open_ports = def.open_ports or [ ];
+  tcp_ports = def.tcp_ports or [ ];
+  udp_ports = def.udp_ports or [ ];
   other_packages = def.other_packages or [ ];
   etc = def.etc or { };
   logging_enabled = def.logging.enable or false; # TODO: Implement
@@ -54,7 +55,11 @@ in
       ]
       ++ extraModules;
       networking.hostName = hostname;
-      networking.firewall.allowedTCPPorts = open_ports;
+      networking.firewall = {
+        enable = true;
+        allowedTCPPorts = tcp_ports;
+        allowedUDPPorts = udp_ports;
+      };
       services =
         services
         // lib.optionalAttrs (logging_enabled) {

@@ -13,16 +13,18 @@ let
 in
 {
   cores = 2;
-  memory = "2G";
+  memory = 1024;
   disk = "4G";
   swap = 512;
-  ports = [
+  tcp_ports = [
     80
     53
     12345
   ];
+  udp_ports = [ 53 ];
   exposed = false;
   services = {
+    resolved.enable = false;
     adguardhome = import ./dns/adguardhome-config.nix { inherit infra ip domainname; };
     unbound = {
       enable = true;

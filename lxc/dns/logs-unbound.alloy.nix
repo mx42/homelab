@@ -23,7 +23,7 @@
           }
         }
 
-    loki.process "unbound_router" {
+    loki.process "unbd_router" {
       stage.pattern {
         pattern = "[<_>] <level>: <message>"
       }
