@@ -1,0 +1,44 @@
+{ ... }:
+{
+  globals = {
+    ip_prefix = "10.0.0.";
+    cidr = 24;
+    gateway = "10.0.0.1";
+    domains = {
+      internal = ".local";
+      external = ".example.tld";
+    };
+    master = {
+      login = "me";
+      email = "my@self";
+      initial_htpasswd = "######";
+      public_ssh_key = "ssh-ed25519 ############";
+    };
+    default_tz = "UTC";
+    country_code = "eu";
+    currency = "EUR";
+    dns_provider = "cloudflare";
+
+    other_hosts = [
+      {
+        hostname = "homeassistant";
+        private = false;
+        auth = false;
+        addr = "http://10.0.0.42:8123/";
+      }
+      {
+        hostname = "proxmox";
+        private = true;
+        auth = false;
+        addr = "https://10.0.0.69:8006/";
+        useCustomCA = true;
+      }
+      {
+        hostname = "nas";
+        private = true;
+        auth = false;
+        addr = "http://10.0.0.99:5000/";
+      }
+    ];
+  };
+}

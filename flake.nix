@@ -7,11 +7,12 @@
     generators.url = "github:nix-community/nixos-generators";
     terranix.url = "github:terranix/terranix";
     devenv.url = "github:cachix/devenv";
-  };
-
-  nixConfig = {
-    extra-trusted-public-keys = "devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw=";
-    extra-substituters = "https://devenv.cachix.org";
+    authentik-nix.url = "github:nix-community/authentik-nix";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.darwin.follows = "";
+    };
   };
 
   outputs =
@@ -22,6 +23,8 @@
       generators,
       terranix,
       devenv,
+      authentik-nix,
+      agenix,
       ...
     }@inputs:
     let
@@ -29,47 +32,65 @@
       pkgs = nixpkgs.legacyPackages.${system};
       lib = pkgs.lib;
 
-      containersMapping = import ./lib/ips.nix;
-
-      containers = import ./lxc { inherit pkgs containersMapping; };
-
-      lxc-def = import ./lib/lxc-template.nix;
-
-      infra = import ./lib/constants.nix;
-
-      nixosConfigurations = lib.mapAttrs (
-        _: def:
-        nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [ def.nixosModule ];
+      finalModule = (
+        lib.evalModules {
+          modules = [
+            {
+              _module.args.nixpkgs = nixpkgs;
+              _module.args.system = system;
+            }
+            ./modules/containers.nix
+            ./config/_globals.nix
+            ./config/_ids.nix
+          ]
+          ++ (import ./containers { inherit pkgs; });
         }
-      ) containers;
+      );
+      nixosModules = finalModule.config.nixosModule;
+      terraformConfig = finalModule.config.tf;
+      # lxc-def = import ./modules/lxc-template.nix;
+      terraformBase = import ./modules/terraform-base.nix;
 
-      terraformCfg = import ./lib/infra.nix;
-
-      terraformResources = {
-        resource.proxmox_lxc = lib.mapAttrs (_: def: def.terraformResource) containers;
-      };
-
+      inherit (import ./config/_globals.nix { }) globals;
     in
     {
       packages.${system} = {
         lxc-template = generators.nixosGenerate {
-          system = "x86_64-linux";
-          modules = [ lxc-def ];
+          inherit system;
           format = "proxmox-lxc";
+          modules = [
+            ./modules/lxc-template.nix
+          ];
+        };
+
+        kiosk-iso = generators.nixosGenerate {
+          inherit system;
+          format = "iso";
+          modules = [
+            ./modules/nixos-kiosk-iso.nix
+          ];
         };
 
         terraform-json = terranix.lib.terranixConfiguration {
           inherit system;
           modules = [
-            terraformResources
-            terraformCfg
+            terraformBase
+            terraformConfig
           ];
         };
       };
 
-      nixosConfigurations = nixosConfigurations;
+      nixosConfigurations = lib.mapAttrs (
+        name: module:
+        nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            agenix.nixosModules.default
+            authentik-nix.nixosModules.default
+            module
+          ];
+        }
+      ) nixosModules;
 
       devShells.${system}.default = devenv.lib.mkShell {
         inherit inputs pkgs;
@@ -84,6 +105,10 @@
                 echo 'Template should be available at nixos-template/tarball/*.tar.xz'
               '';
 
+              scripts.build-kiosk-iso.exec = ''
+                nix build .#kiosk-iso -o kiosk.iso
+              '';
+
               scripts.build-terraform-json.exec = ''
                 nix build .#terraform-json -o config.tf.json
                 echo 'Terraform build available as config.tf.json'
@@ -93,33 +118,34 @@
                 if ! [[ "$2" =~ ^[0-9]+$ ]]; then
                   echo "Error: invalid container ID '$2', should be a number" && exit
                 fi
-                if ! [ -f lib/ips.nix ]; then
-                  echo "{" > lib/ips.nix
-                  echo "}" >> lib/ips.nix
+                if ! [ -f config/_ids.nix ]; then
+                  echo "{ ... }: { id = {" > config/_ids.nix
+                  echo "};\n}" >> config/_ids.nix
                 fi
-                if ! [[ -z "`grep "[^0-9]$2[^0-9]" lib/ips.nix`" ]]; then
+                if ! [[ -z "`grep "[^0-9]$2[^0-9]" config/_ids.nix`" ]]; then
                   echo "Error: container ID '$2' already used" && exit
                 fi
-                if [ -f lxc/$1.nix ]; then
+                if [ -f containers/$1.nix ]; then
                   echo "Error: container definition '$1' already exists" && exit
                 fi
-                sed -i "s#}#  $1 = $2;#" lib/ips.nix
-                echo "}" >> lib/ips.nix
-                cp lib/container.nix.template lxc/$1.nix
-                git add lxc/$1.nix
-                echo "Entry added to infra/ips.nix"
-                echo "Container template copied to lxc/$1.nix, please edit it"
+                sed -i "s#};#  $1 = $2;\n  };#" config/_ids.nix
+                cp containers/_cont.tmpl containers/$1.nix
+                sed -i "s/#name#/$1/g" containers/$1.nix
+                git add containers/$1.nix
+                echo "Entry added to config/_ids.nix"
+                echo "Container template copied to containers/$1.nix, please edit it"
               '';
 
               scripts.deploy-lxc.exec = ''
-                if [ -f lxc/$1.nix ]; then
-                  CONTID=`grep -E "$1 ?=" lib/ips.nix | cut -d '=' -f 2 | grep -o '\<[0-9]*\>' `
+                if [ -f containers/$1.nix ]; then
+                  CONTID=`grep -E "$1 ?=" config/_ids.nix | cut -d '=' -f 2 | grep -o '\<[0-9]*\>' `
+                  IP_SUFFIX=$((CONTID - 1000))
                   # TODO Verify mapping exists...
                   echo "Redeploying LXC on container '$1' ('$CONTID')"
-                  nixos-rebuild switch --flake .#$1 --target-host root@${infra.ip_prefix}$CONTID
+                  nixos-rebuild switch --flake .#$1 --target-host root@${globals.ip_prefix}$IP_SUFFIX
                   echo "Done."
                 else
-                  echo "Error: Container definition 'lxc/$1.nix' not found!"
+                  echo "Error: Container definition 'containers/$1.nix' not found!"
                 fi
               '';
 

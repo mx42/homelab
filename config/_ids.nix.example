@@ -1,0 +1,17 @@
+{ ... }:
+{
+  id = {
+    dns = 1002;
+    proxy = 1003;
+    auth = 1004;
+    db = 1005;
+    metrics = 1006;
+    monitoring = 1007;
+    vault = 1008;
+
+    nas = 99;
+    proxmox = 69;
+    homeassistant = 42;
+    camera = 200;
+  };
+}

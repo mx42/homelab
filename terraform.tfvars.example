@@ -2,3 +2,9 @@ pm_api_url          = "https://proxmox:8006/api2/json"
 pm_api_token_id     = "terraform@pve"
 pm_api_token_secret = "secr3t"
 pve_node = "proxmox"
+
+pg_host = "10.0.0."
+pg_user = "tf"
+pg_pass = "terraf0rm"
+
+ostemplate = "nixos-image-lxc-proxmox-..."

@@ -1,0 +1,28 @@
+{ ... }:
+let
+  db_pass = import ../config/_passwords.nix;
+in
+{
+  my-lxc.#name# = {
+    container = {
+      cores = 1;
+      memory = 512;
+      disk = "4G";
+      swap = 512;
+    };
+    db = {
+      enable = true;
+      password = db_pass.#name#;
+    };
+    system = {
+      port = 80;  # open in firewall + expose on proxy
+      services.nginx.enable = true;
+    };
+    logging = {
+      enable = true;
+      metricsEnable = true;
+    };
+    private = true;  # available only on private lan
+    auth = true;  # auth overlay
+  };
+}
