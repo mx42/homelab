@@ -1,0 +1,1 @@
+/home/xmorel/homelab-private/_globals.nix
