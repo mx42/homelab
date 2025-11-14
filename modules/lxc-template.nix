@@ -6,6 +6,7 @@ let
   lib = pkgs.lib;
   modulesPath = pkgs.path + "/nixos/modules";
   config = import ../config/_globals.nix { };
+  id = (import ../config/_ids.nix { }).id;
 in
 {
   imports = [
@@ -37,6 +38,11 @@ in
     dates = "weekly";
     options = "--delete-older-than 7d";
   };
+  networking.nameservers =
+    (
+      if (lib.hasAttr "dns" id) then [ "${config.globals.ip_prefix}${toString (id.dns - 1000)}" ] else [ ]
+    )
+    ++ [ "9.9.9.9" ];
 
   time.timeZone = config.globals.default_tz;
 

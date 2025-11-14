@@ -101,7 +101,7 @@
               languages.opentofu.enable = true;
 
               scripts.build-template.exec = ''
-                nix build .#lxc-template -o nixos-template
+                nix build .#lxc-template -o nixos-template --impure
                 echo 'Template should be available at nixos-template/tarball/*.tar.xz'
               '';
 
@@ -110,7 +110,7 @@
               '';
 
               scripts.build-terraform-json.exec = ''
-                nix build .#terraform-json -o config.tf.json
+                nix build .#terraform-json -o config.tf.json --impure
                 echo 'Terraform build available as config.tf.json'
               '';
 
@@ -142,7 +142,7 @@
                   IP_SUFFIX=$((CONTID - 1000))
                   # TODO Verify mapping exists...
                   echo "Redeploying LXC on container '$1' ('$CONTID')"
-                  nixos-rebuild switch --flake .#$1 --target-host root@${globals.ip_prefix}$IP_SUFFIX
+                  nixos-rebuild switch --impure --flake .#$1 --target-host root@${globals.ip_prefix}$IP_SUFFIX
                   echo "Done."
                 else
                   echo "Error: Container definition 'containers/$1.nix' not found!"

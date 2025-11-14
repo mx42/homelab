@@ -25,6 +25,17 @@ in
       staticConfigOptions = {
         api.insecure = true;
         log.level = "INFO";
+        accessLog = {
+          filters.statusCodes = [
+            "200"
+            "400-404"
+            "500-503"
+          ];
+          fields = {
+            names.ClientUsername = "drop";
+            headers.defaultMode = "drop";
+          };
+        };
         entryPoints = {
           web.address = ":80";
           websecure.address = ":443";
