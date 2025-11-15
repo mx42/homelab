@@ -25,6 +25,7 @@ in
           "dlna"
           "filesystem_local"
           "filesystem_smb"
+          "hass"
           "hass_players"
           "jellyfin"
           "player_group"

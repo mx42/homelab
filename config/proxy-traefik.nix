@@ -83,6 +83,12 @@ in
             addServicesLabels = true;
           };
         };
+        experimental.plugins = {
+          staticResponse = {
+            moduleName = "github.com/jdel/staticresponse";
+            version = "v0.0.1";
+          };
+        };
       };
       dynamicConfigOptions = {
         tcp = {
@@ -153,88 +159,111 @@ in
                 "Remote-Name"
               ];
             };
+            matrix-wellknown.plugin.staticResponse = {
+              statusCode = 200;
+              body = ''{"m.server": "${tools.build_hostname "matrix"}:443"}'';
+              headers = {
+                "Content-Type" = "application/json";
+              };
+            };
           };
-          routers = mergeConf (
-            lib.concatLists (
-              (lib.mapAttrsToList (
-                ct: def:
-                (map (
-                  d:
-                  lib.optionalAttrs (d.raw_tcp == false) {
-                    ${d.subdomain} = {
-                      rule = (
-                        if (d.customRule != null) then
-                          (lib.replaceStrings [ "#DOMAIN#" ] [ dmn ] d.customRule)
-                        else
-                          ("Host(`${d.subdomain}${dmn}`) " + (if (d.private == true) then internal else ""))
-                      );
-                      service = "${d.subdomain}-service";
-                      entryPoints = [ "websecure" ];
-                      middlewares = if (d.auth) then [ "authentik" ] else [ ];
-                      tls.certResolver = "letsencrypt";
-                    };
-                  }
-                ) def.otherDomains)
-                ++ [
-                  (lib.optionalAttrs (def.system.port != null) {
-                    ${ct} = {
-                      rule = "Host(`${ct}${dmn}`) " + (if (def.private == true) then internal else "");
-                      service = "${ct}-service";
-                      entryPoints = [ "websecure" ];
-                      middlewares = if (def.auth) then [ "authentik" ] else [ ];
-                      tls.certResolver = "letsencrypt";
-                    };
-                  })
-                ]
-              ) config.my-lxc)
-              ++ [
-                (map (h: {
-                  ${h.hostname} = {
-                    rule = "Host(`${h.hostname}${dmn}`) " + (if (h.private == true) then internal else "");
-                    service = "${h.hostname}-service";
-                    entryPoints = [ "websecure" ];
-                    middlewares = if (h.auth) then [ "authentik" ] else [ ];
-                    tls.certResolver = "letsencrypt";
-                  };
-                }) config.globals.other_hosts)
-              ]
-            )
-          );
-          services = mergeConf (
-            lib.concatLists (
-              (lib.mapAttrsToList (
-                ct: def:
-                (map (d: {
-                  "${d.subdomain}-service" = {
-                    loadBalancer.servers = [
-                      { url = "http://${ip ct}:${toString d.port}/"; }
-                    ];
-                  };
-                }) def.otherDomains)
-                ++ [
-                  (
+          routers =
+            mergeConf (
+              lib.concatLists (
+                (lib.mapAttrsToList (
+                  ct: def:
+                  (map (
+                    d:
+                    lib.optionalAttrs (d.raw_tcp == false) {
+                      ${d.subdomain} = {
+                        rule = (
+                          if (d.customRule != null) then
+                            (lib.replaceStrings [ "#DOMAIN#" ] [ dmn ] d.customRule)
+                          else
+                            ("Host(`${d.subdomain}${dmn}`) " + (if (d.private == true) then internal else ""))
+                        );
+                        service = "${d.subdomain}-service";
+                        entryPoints = [ "websecure" ];
+                        middlewares = if (d.auth) then [ "authentik" ] else [ ];
+                        tls.certResolver = "letsencrypt";
+                      };
+                    }
+                  ) def.otherDomains)
+                  ++ [
                     (lib.optionalAttrs (def.system.port != null) {
-                      "${ct}-service" = {
-                        loadBalancer.servers = [ { url = "http://${ip ct}:${toString def.system.port}/"; } ];
+                      ${ct} = {
+                        rule = "Host(`${ct}${dmn}`) " + (if (def.private == true) then internal else "");
+                        service = "${ct}-service";
+                        entryPoints = [ "websecure" ];
+                        middlewares = if (def.auth) then [ "authentik" ] else [ ];
+                        tls.certResolver = "letsencrypt";
                       };
                     })
-                  )
+                  ]
+                ) config.my-lxc)
+                ++ [
+                  (map (h: {
+                    ${h.hostname} = {
+                      rule = "Host(`${h.hostname}${dmn}`) " + (if (h.private == true) then internal else "");
+                      service = "${h.hostname}-service";
+                      entryPoints = [ "websecure" ];
+                      middlewares = if (h.auth) then [ "authentik" ] else [ ];
+                      tls.certResolver = "letsencrypt";
+                    };
+                  }) config.globals.other_hosts)
                 ]
-              ) config.my-lxc)
-              ++ [
-                (map (h: {
-                  "${h.hostname}-service" = {
-                    loadBalancer = {
-                      servers = [ { url = h.addr; } ];
-                    }
-                    // (lib.optionalAttrs (h.useCustomCA) {
-                      serversTransport = "${h.hostname}-transport";
-                    });
-                  };
-                }) config.globals.other_hosts)
-              ]
+              )
             )
-          );
+            // {
+              matrix-wellknown = {
+                rule = "Path(`/\.well-known/matrix/server`)";
+                entryPoints = [ "websecure" ];
+                service = "noop";
+                middlewares = [ "matrix-wellknown" ];
+                tls.certResolver = "letsencrypt";
+              };
+            }
+
+          ;
+          services =
+            mergeConf (
+              lib.concatLists (
+                (lib.mapAttrsToList (
+                  ct: def:
+                  (map (d: {
+                    "${d.subdomain}-service" = {
+                      loadBalancer.servers = [
+                        { url = "http://${ip ct}:${toString d.port}/"; }
+                      ];
+                    };
+                  }) def.otherDomains)
+                  ++ [
+                    (
+                      (lib.optionalAttrs (def.system.port != null) {
+                        "${ct}-service" = {
+                          loadBalancer.servers = [ { url = "http://${ip ct}:${toString def.system.port}/"; } ];
+                        };
+                      })
+                    )
+                  ]
+                ) config.my-lxc)
+                ++ [
+                  (map (h: {
+                    "${h.hostname}-service" = {
+                      loadBalancer = {
+                        servers = [ { url = h.addr; } ];
+                      }
+                      // (lib.optionalAttrs (h.useCustomCA) {
+                        serversTransport = "${h.hostname}-transport";
+                      });
+                    };
+                  }) config.globals.other_hosts)
+                ]
+              )
+            )
+            // {
+              noop.loadBalancer.servers = [ ];
+            };
           serversTransports = mergeConf (
             (map (
               h:

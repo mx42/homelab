@@ -8,7 +8,7 @@ let
   container = "matrix";
   hostname = tools.build_hostname container;
   admin_handle = "@${config.globals.master.login}:${hostname}";
-  db_host = tools.build_hostname "db";
+  db_host = tools.build_ip "db";
   auth_host = tools.build_hostname "auth";
   db_pass = config.my-lxc.matrix.db.password;
   sec = import ../config/_matrix_secrets.nix;
@@ -38,11 +38,13 @@ in
   services.matrix-synapse = {
     enable = true;
     extras = [
+      "jwt"
       "oidc"
       "postgres"
       "systemd"
-      "url-preview"
+      # "url-preview"
     ];
+    # plugins matrix-synapse-ldap3?
     settings = {
       admin_users = [
         admin_handle
@@ -69,10 +71,11 @@ in
           resources = [
             {
               compress = true;
-              names = [
-                "client"
-                "federation"
-              ];
+              names = [ "client" ];
+            }
+            {
+              compress = false;
+              names = [ "federation" ];
             }
           ];
           tls = false;
@@ -80,11 +83,11 @@ in
           x_forwarded = true;
         }
       ];
-      matrix-authentication-service = {
-        enable = true;
-        endpoint = "http://localhost:8080/";
-        secret = sec.mas_secret;
-      };
+      # matrix-authentication-service = {
+      #   enable = true;
+      #   endpoint = "http://localhost:8080/";
+      #   secret = sec.mas_secret;
+      # };
       jwt_config = {
         enabled = true;
         secret = sec.jwt_secret;
@@ -109,6 +112,8 @@ in
           };
         }
       ];
+      macaroon_secret_key = sec.macaroon;
+      suppress_key_server_warning = true;
     };
   };
 }

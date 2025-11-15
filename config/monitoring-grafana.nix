@@ -12,11 +12,12 @@ in
   services.grafana = {
     enable = true;
     openFirewall = true;
-    declarativePlugins = [
-      pkgs.grafanaPlugins.grafana-mqtt-datasource
-      pkgs.grafanaPlugins.grafana-lokiexplore-app
-      pkgs.grafanaPlugins.grafana-metricsdrilldown-app
-    ];
+    ## NOTE: Installs the plugins but it doesn't work ... however then removing declarative plugins make them work...
+    # declarativePlugins = [
+    #   pkgs.grafanaPlugins.grafana-mqtt-datasource
+    #   pkgs.grafanaPlugins.grafana-lokiexplore-app
+    #   pkgs.grafanaPlugins.grafana-metricsdrilldown-app
+    # ];
     provision = {
       enable = true;
       alerting = { };
@@ -43,7 +44,7 @@ in
       analytics = {
         feedback_links_enabled = false;
         reporting_enabled = false;
-        check_for_plugin_updates = false;
+        check_for_plugin_updates = true;
         check_for_updates = false;
       };
       database = {

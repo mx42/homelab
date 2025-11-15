@@ -9,6 +9,7 @@
       swap = 512;
     };
     system = {
+      port = 80;
       importConfig = [
         ../config/power-ups.nix
       ];

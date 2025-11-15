@@ -24,7 +24,7 @@ in
       enable = true;
       metricsEnable = true;
     };
-    private = true; # available only on private lan
+    private = false; # available only on private lan
     auth = false; # auth overlay
   };
 }

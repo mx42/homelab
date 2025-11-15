@@ -18,6 +18,7 @@ in
         inherit tools;
         container = "matrix";
         service = "nginx";
+        additional_stages = ""; # TODO: ...
       }).out;
   };
   services.nginx = {
@@ -34,7 +35,7 @@ in
         };
         "= /config.json" = {
           alias = json.generate "element.config.json" (
-            import ./config/matrix-element.config.nix { inherit tools config; }
+            import ./matrix-element.config.nix { inherit tools config; }
           );
         };
       };
@@ -54,7 +55,7 @@ in
         };
         "= /config.json" = {
           alias = json.generate "synapse-admin.config.json" (
-            import ./config/matrix-synapse-admin.config.nix { inherit tools config; }
+            import ./matrix-synapse-admin.config.nix { inherit tools config; }
           );
         };
       };

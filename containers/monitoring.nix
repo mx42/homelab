@@ -5,10 +5,11 @@ in
 {
   my-lxc.monitoring = {
     container = {
+      enable = true;
       cores = 2;
-      memory = 1024;
+      memory = 2048;
       disk = "10G";
-      swap = 512;
+      swap = 1024;
     };
     system = {
       port = 3000; # grafana

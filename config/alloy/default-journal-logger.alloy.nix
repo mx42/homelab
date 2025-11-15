@@ -8,7 +8,7 @@
 let
   hostname = tools.build_hostname container;
   ip = tools.build_ip container;
-  prefix = "${container}_${service}";
+  prefix = "${container}_${builtins.replaceStrings [ "-" ] [ "_" ] service}";
 in
 {
   out = ''
