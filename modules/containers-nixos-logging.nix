@@ -34,15 +34,14 @@ in
     }) def.logging.alloyConfig)
     ++ (lib.mapAttrsToList (service: additional_stages: {
       "alloy/${container}-${service}.alloy".text =
-        import ../config/alloy/default-journal-logger.alloy.nix
-          {
-            inherit
-              tools
-              container
-              service
-              additional_stages
-              ;
-          };
+        (import ../config/alloy/default-journal-logger.alloy.nix {
+          inherit
+            tools
+            container
+            service
+            additional_stages
+            ;
+        }).out;
     }) def.logging.journalLoggers)
   );
 
