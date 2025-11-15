@@ -26,7 +26,8 @@ in
 
         stage.timestamp {
           source = "timestamp"
-          format = "2006-01-02 15:04:05"
+          format = "2006/01/02 15:04:05.999999"
+          location = "${config.globals.default_tz}"
         }
 
         stage.labels {

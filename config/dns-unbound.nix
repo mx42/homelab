@@ -7,7 +7,7 @@ let
   mask_cidr = tools.mask_cidr; # build_ip_cidr 0 config.globals.cidr;
 in
 {
-  environment.etc."alloy/logs-adguardhome.alloy".text =
+  environment.etc."alloy/logs-unbound.alloy".text =
     (import ./alloy/default-journal-logger.alloy.nix {
       inherit tools;
       container = "dns";
