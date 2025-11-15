@@ -20,6 +20,13 @@ in
     "sys-kernel-debug.mount"
     "sys-fs-fuse-connections.mount"
   ];
+  services.journald.extraConfig = ''
+    SystemMaxUse=200M
+    SystemKeepFree=100M
+    SystemMaxFileSize=20M
+    SystemMaxFiles=10
+    MaxRetentionSec=5day
+  '';
   environment.systemPackages = with pkgs; [
     vim
     openssl
@@ -35,8 +42,12 @@ in
   };
   nix.gc = {
     automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 7d";
+    dates = "daily";
+    options = "--delete-older-than 3d";
+  };
+  nix.optimise = {
+    automatic = true;
+    dates = [ "weekly" ];
   };
   networking.nameservers =
     (

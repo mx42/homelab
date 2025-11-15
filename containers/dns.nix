@@ -6,8 +6,8 @@
     container = {
       cores = 2;
       memory = 1024;
-      disk = "4G";
-      swap = 512;
+      disk = "5G";
+      swap = 768;
     };
     system = {
       port = 80;
@@ -24,6 +24,9 @@
     logging = {
       enable = true;
       metricsEnable = true;
+      prometheusPorts = [
+        9167
+      ];
     };
     private = true;
     auth = true;

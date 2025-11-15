@@ -28,6 +28,11 @@ in
         }
       '';
     }).out;
+  services.prometheus.exporters.unbound = {
+    enable = true;
+    port = 9167;
+    openFirewall = true;
+  };
   services.unbound = {
     enable = true;
     settings = {
