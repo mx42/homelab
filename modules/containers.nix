@@ -240,6 +240,7 @@ in
           default_tz = mkOption { type = str; };
           country_code = mkOption { type = str; };
           currency = mkOption { type = str; };
+          retention = mkOption { type = str; };
           services = mkOption {
             type = submodule {
               log_sink = mkOption { type = str; }; # ip:port

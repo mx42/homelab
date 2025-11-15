@@ -16,36 +16,14 @@ let
   ];
 in
 {
-  environment.etc."alloy/logs-traefik.alloy".text =
-    (import ./alloy/default-journal-logger.alloy.nix {
-      inherit tools;
-      container = "proxy";
-      service = "traefik";
-      additional_stages = ''
-        stage.regex {
-          expression = "^(?P<client_ip>\\S+) (?P<ident>\\S+) (?P<auth_id>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \"(?P<method>\\S+) (?P<path>\\S+) HTTP/(?P<http_version>\\S+)\" (?P<status>\\d+) (?P<bytes_sent>\\d+) \"(?P<referrer>[^\"]*)\" \"(?P<user_agent>[^\"]*)\" (?P<bytes_received>\\d+) \"(?P<router>[^\"]*)\" \"(?P<upstream>[^\"]*)\" (?P<duration>\\d+)ms$"
-        }
-
-        stage.timestamp {
-          source = "timestamp"
-          format = "02/Jan/2006:15:04:05 -0700"
-        }
-
-        stage.labels {
-        values = {
-          client_ip = "",
-          ident = "",
-          auth_id = "",
-          method = "",
-          status = "",
-          referrer = "",
-          router = "",
-          upstream = "",
-          }
-        }
-
-      '';
-    }).out;
+  # environment.etc."alloy/logs-traefik.alloy".text =
+  #   (import ./alloy/default-journal-logger.alloy.nix {
+  #     inherit tools;
+  #     container = "proxy";
+  #     service = "traefik";
+  #
+  #     '';
+  #   }).out;
 
   services = {
     traefik = {

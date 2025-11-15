@@ -22,10 +22,30 @@
     logging = {
       enable = true;
       metricsEnable = true;
-      alloyConfig = {
-        # probably move to default-journal...
-        "logs-traefik" = ../config/alloy/proxy-traefik.alloy.nix;
-      };
+      prometheusPorts.traefik = 8082;
+      journalLoggers.traefik = ''
+        stage.regex {
+          expression = "^(?P<client_ip>\\S+) (?P<ident>\\S+) (?P<auth_id>\\S+) \\[(?P<timestamp>[^\\]]+)\\] \"(?P<method>\\S+) (?P<path>\\S+) HTTP/(?P<http_version>\\S+)\" (?P<status>\\d+) (?P<bytes_sent>\\d+) \"(?P<referrer>[^\"]*)\" \"(?P<user_agent>[^\"]*)\" (?P<bytes_received>\\d+) \"(?P<router>[^\"]*)\" \"(?P<upstream>[^\"]*)\" (?P<duration>\\d+)ms$"
+        }
+
+        stage.timestamp {
+          source = "timestamp"
+          format = "02/Jan/2006:15:04:05 -0700"
+        }
+
+        stage.labels {
+        values = {
+          client_ip = "",
+          ident = "",
+          auth_id = "",
+          method = "",
+          status = "",
+          referrer = "",
+          router = "",
+          upstream = "",
+          }
+        }
+      '';
     };
     private = true;
     auth = true;

@@ -29,9 +29,13 @@
           kvstore.store = "inmemory";
         };
         replication_factor = 1;
-        path_prefix = "/tmp/loki";
+        path_prefix = "/var/lib/loki";
       };
-      storage_config.filesystem.directory = "/tmp/loki/chunks";
+      storage_config.filesystem.directory = "/var/lib/loki/chunks";
+      table_manager = {
+        retention_deletes_enabled = true;
+        retention_period = config.globals.retention;
+      };
     };
   };
 }

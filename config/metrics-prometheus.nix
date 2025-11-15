@@ -13,6 +13,7 @@ in
     extraFlags = [
       "--web.enable-otlp-receiver"
       "--web.enable-remote-write-receiver"
+      "--storage.tsdb.retention.time=${config.globals.retention}"
     ];
     globalConfig = {
       scrape_interval = "30s";
