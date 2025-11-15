@@ -24,7 +24,9 @@
     logging = {
       enable = true;
       metricsEnable = true;
-      prometheusPorts = [ 9187 ];
+      prometheusPorts = {
+        postgres = 9187;
+      };
     };
     private = true;
     auth = true;

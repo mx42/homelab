@@ -21,7 +21,14 @@ in
       {
         job_name = "prometheus";
         static_configs = [
-          { targets = [ "localhost:9090" ]; }
+          {
+            targets = [ "localhost:9090" ];
+            labels = {
+              host = tools.build_hostname "metrics";
+              host_ip = tools.build_ip "metrics";
+              service = "prometheus";
+            };
+          }
         ];
       }
     ]
@@ -33,8 +40,13 @@ in
         in
         {
           job_name = container;
-          static_configs = map (port: {
+          static_configs = lib.mapAttrsToList (service: port: {
             targets = [ "${container_ip}:${toString port}" ];
+            labels = {
+              host = tools.build_hostname container;
+              host_ip = tools.build_ip container;
+              service = service;
+            };
           }) def.logging.prometheusPorts;
         }
       ) config.my-lxc

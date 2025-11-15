@@ -5,7 +5,7 @@
   ...
 }:
 {
-  environment.etc."yarrr.env".source = config.age.secrets.yarrr-env;
+  environment.etc."yarrr.env".source = config.age.secrets.yarrr-env.path;
 
   services = {
     bazarr = {

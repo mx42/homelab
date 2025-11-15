@@ -142,9 +142,9 @@ in
                 enable = mkEnableOption "Whether to enable default logs collection";
                 metricsEnable = mkEnableOption "Whether to enable default metrics collection";
                 prometheusPorts = mkOption {
-                  type = listOf int;
-                  description = "Ports of Prometheus Exporters";
-                  default = [ ];
+                  type = attrsOf int;
+                  description = "Service => ports of Prometheus Exporters";
+                  default = { };
                 };
                 alloyConfig = mkOption {
                   type = attrsOf path;

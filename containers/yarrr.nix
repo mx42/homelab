@@ -30,9 +30,9 @@ in
     logging = {
       enable = true;
       metricsEnable = true;
-      prometheusPorts = [
-        9708
-      ];
+      prometheusPorts = {
+        yarrr = 9708;
+      };
     };
     otherDomains = [
       {

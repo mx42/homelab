@@ -27,15 +27,31 @@
 
     prometheus.relabel "filter_metrics" {
       rule {
-        action = "drop"
-        source_labels = [ "env" ]
-        regex = "dev"
+        source_labels = ["__name__"]
+        regex         = ".*_build_info"
+        action        = "drop"
       }
       rule {
-        action = "replace"
-        regex = "127\\.0\\.0\\.1"
-        target_label = "instance"
-        replacement = "${tools.build_ip container}"
+        source_labels = ["__name__"]
+        regex         = "go_.*"
+        action        = "drop"
+      }
+      rule {
+        source_labels = [ "env" ]
+        regex         = "dev"
+        action        = "drop"
+      }
+      rule {
+        target_label  = "host"
+        replacement   = "${tools.build_hostname container}"
+      }
+      rule {
+        target_label  = "host_ip"
+        replacement   = "${tools.build_ip container}"
+      }
+      rule {
+        target_label  = "service"
+        replacement   = "alloy"
       }
       forward_to = [prometheus.remote_write.metrics_service.receiver]
     }
