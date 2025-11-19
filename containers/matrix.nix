@@ -18,8 +18,10 @@ in
       additionalPorts = [
         80 # element web
         5173 # synapse admin
+        29316 # maubot
       ];
       importConfig = [
+        ../config/matrix-maubot.nix
         ../config/matrix-synapse.nix
         ../config/matrix-nginx.nix
       ];
@@ -27,6 +29,9 @@ in
     db = {
       enable = true;
       password = db_pass.matrix;
+      additionalDB = [
+        "maubot"
+      ];
     };
     logging = {
       enable = true;
@@ -44,6 +49,12 @@ in
       {
         subdomain = "matrix-admin";
         port = 5173;
+        private = true;
+        auth = false;
+      }
+      {
+        subdomain = "maubot";
+        port = 29316;
         private = true;
         auth = false;
       }

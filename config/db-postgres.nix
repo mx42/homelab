@@ -15,4 +15,13 @@
     checkConfig = true;
     initialScript = config.age.secrets.db-postgres-initscript.path;
   };
+
+  # TODO: Manually add /mnt/backups mountpoint => NAS backup folder (with rotation on the NAS)
+  services.postgresqlBackup = {
+    enable = true;
+    backupAll = true;
+    compression = "gzip";
+    compressionLevel = 6;
+    location = "/mnt/backups/postgresql";
+  };
 }

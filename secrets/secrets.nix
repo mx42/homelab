@@ -24,6 +24,12 @@ in
   "finances-app-key.age".publicKeys = users ++ [
     keys.finances
   ];
+  "matrix-maubot-cfg.age".publicKeys = users ++ [
+    keys.matrix
+  ];
+  "metrics-pve.age".publicKeys = users ++ [
+    keys.metrics
+  ];
   "power-password-file.age".publicKeys = users ++ [
     keys.power
   ];

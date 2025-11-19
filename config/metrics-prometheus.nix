@@ -15,6 +15,20 @@ in
       "--web.enable-remote-write-receiver"
       "--storage.tsdb.retention.time=${config.globals.retention}"
     ];
+    exporters.pve = {
+      enable = true;
+      collectors = {
+        cluster = true;
+        config = false;
+        node = true;
+        replication = false;
+        resources = true;
+        status = true;
+        version = true;
+      };
+      configFile = config.age.secrets.metrics-pve.path;
+      port = 9221;
+    };
     globalConfig = {
       scrape_interval = "30s";
     };
@@ -28,6 +42,14 @@ in
               host = tools.build_hostname "metrics";
               host_ip = tools.build_ip "metrics";
               service = "prometheus";
+            };
+          }
+          {
+            targets = [ "localhost:9221" ];
+            labels = {
+              host = tools.build_hostname "proxmox";
+              host_ip = tools.build_ip "proxmox";
+              service = "proxmox";
             };
           }
         ];

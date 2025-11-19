@@ -16,11 +16,16 @@
         host = tools.build_ip "db";
         createDatabase = false;
       };
-      # TODO: dump ...
       settings = {
         server.HTTP_PORT = 3000;
       };
-      # user = "git";
+      dump = {
+        enable = true;
+        # TODO: Manual mountpoint /mnt/backups => NAS
+        backupDir = "/mnt/backups/gitea";
+        interval = "1:42";
+        type = "tar.gz";
+      };
     };
     # gitea-actions-runner.instances.default = {
     #   enable = true;
