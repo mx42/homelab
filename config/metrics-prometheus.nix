@@ -44,6 +44,11 @@ in
               service = "prometheus";
             };
           }
+        ];
+      }
+      {
+        job_name = "proxmox";
+        static_configs = [
           {
             targets = [ "localhost:9221" ];
             labels = {
@@ -53,6 +58,10 @@ in
             };
           }
         ];
+        metrics_path = "/pve";
+        params = {
+          target = [ (tools.build_ip "proxmox") ];
+        };
       }
     ]
     ++ (lib.filter (sc: sc.static_configs != [ ]) (

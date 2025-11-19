@@ -8,7 +8,10 @@
       swap = 512;
     };
     system = {
-      additionalPorts = [ 9090 ];
+      additionalPorts = [
+        9090
+        9221
+      ];
       importConfig = [
         ../config/metrics-prometheus.nix
       ];
